@@ -50,7 +50,7 @@ namespace Cours
 
 			Console.WriteLine(BcGame.IsGameWon
 				? "Congratulation, you won!"
-				: "Bad luck, maybe you'll do better next time.");
+				: "Better luck next time!");
 		}
 
 		//Ask the player if he wants to play again.
@@ -90,15 +90,15 @@ namespace Cours
 				switch (valid)
 				{
 					case BullsCowsGame.EGuessStatus.WrongLengh:
-						Console.WriteLine("Please enter a word that is " + BcGame.HiddenWordLenght + " letters long.");
+						Console.WriteLine("Please enter a " + BcGame.HiddenWordLenght + " letters word.");
 						break;
 
 					case BullsCowsGame.EGuessStatus.NotLowerCase:
-						Console.WriteLine("Please only use lowercase.");
+						Console.WriteLine("Please enter all lowercase letters.");
 						break;
 
 					case BullsCowsGame.EGuessStatus.NotIsogram:
-						Console.WriteLine("Please enter an isogram.");
+						Console.WriteLine("Please enter a word witout repeating letters.");
 						break;
 				}
 			} while (valid != BullsCowsGame.EGuessStatus.Ok);
