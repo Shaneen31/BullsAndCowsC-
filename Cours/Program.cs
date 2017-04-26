@@ -4,7 +4,7 @@ namespace Cours
 {
 	internal class Program
 	{
-		private const string Version = "0.1.0";
+		private const string Version = "0.2.0";
 
 		static readonly BullsCowsGame BcGame = new BullsCowsGame();
 

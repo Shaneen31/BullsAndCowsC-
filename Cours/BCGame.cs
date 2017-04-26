@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Cours
 {
@@ -9,7 +11,8 @@ namespace Cours
 		private bool m_isWon;
 		private int m_bulls;
 		private int m_cows;
-        
+		private readonly List<string>m_dictionary = new List<string>();
+
 		public enum EGuessStatus
 		{
 
@@ -24,6 +27,7 @@ namespace Cours
 		************************************************************/
 		public BullsCowsGame()
 		{
+			LoadDictionary();
 			Reset();
 		}
 
@@ -34,8 +38,7 @@ namespace Cours
 
 		public int CurrentTry => m_currentTry;
 
-		// TODO Add multiple value according to HiddenWord Lenght
-		public int GetMaxTries => m_hiddenWord.Length + 1;
+		public int GetMaxTries => 4*m_hiddenWord.Length - 8;
 
 		public int BullsCount => m_bulls;
 
@@ -46,13 +49,40 @@ namespace Cours
 		/************************************************************
 			Methods
 		************************************************************/
+		void LoadDictionary()
+		{
+			string line;
+
+			StreamReader file = new StreamReader("dictionary.txt");
+			while ((line = file.ReadLine()) != null)
+			{
+				m_dictionary.Add(line);
+			}
+		}
+
+		string SelectRandomWord()
+		{
+			int WordIndex;
+			Random random = new Random();
+
+			WordIndex = random.Next(1, m_dictionary.Count);
+
+			return m_dictionary[WordIndex - 1];
+		}
+
+
 		public void Reset()
 		{
-			m_hiddenWord = "planet";
+			m_hiddenWord = SelectRandomWord();
 			m_currentTry = 1;
 			m_isWon = false;
 		}
 
+		/// <summary>
+		/// Receive a player guess and test it for validation.
+		/// </summary>
+		/// <param name="guess">string comming from the player entry</param>
+		/// <returns>Enum value according to status</returns>
 		public EGuessStatus ValidateGuess(string guess)
 		{
 			if (guess.Length != m_hiddenWord.Length)
@@ -73,7 +103,11 @@ namespace Cours
 			}
 		}
 
-		// Check if player guess is lower case
+		/// <summary>
+		/// Check if player guess is lower case
+		/// </summary>
+		/// <param name="guess"></param>
+		/// <returns></returns>
 		bool IsLowerCase(string guess)
 		{
 			foreach (char letter in guess)
@@ -86,7 +120,11 @@ namespace Cours
 			return true;
 		}
 
-		// Check if player guess is an isogram
+		/// <summary>
+		/// Check if player guess is an isogram
+		/// </summary>
+		/// <param name="guess"></param>
+		/// <returns></returns>
 		bool IsIsogram(string guess)
 		{
 			if (guess.Length == 1)
@@ -110,7 +148,11 @@ namespace Cours
 			return true;
 		}
 
-		// Count Bulls & Cows in player's Guess
+		/// <summary>
+		/// Count Bulls & Cows in player's Guess
+		/// </summary>
+		/// <param name="guess"></param>
+		/// <returns>bool</returns>
 		public bool EndGame(string guess)
 		{
 			m_bulls = 0;
