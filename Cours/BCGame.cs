@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Linq;
 
-namespace Cours
+namespace CowLevel
 {
 	public class BullsCowsGame
 	{
-		private string m_hiddenWord;
-		private int m_currentTry;
-		private bool m_isWon;
-		private int m_bulls;
-		private int m_cows;
-		private readonly List<string>m_dictionary = new List<string>();
+		private readonly string m_hiddenWord;
+		public int HiddenWordLength { get { return m_hiddenWord.Length; } }
+		public int CurrentTry { get; private set; } = 1;
+		public int MaxTries { get { return 4*HiddenWordLength - 8; } }
+		public bool IsWon { get; private set; }
+		public int BullsCount { get; private set;}
+		public int CowsCount { get; private set; }
 
-		public enum EGuessStatus
+		public enum GuessStatus
 		{
-
-			WrongLengh,
-			NotLowerCase,
+			WrongLength,
 			NotIsogram,
 			Ok
 		}
@@ -25,159 +22,71 @@ namespace Cours
 		/************************************************************
 			Constructor
 		************************************************************/
-		public BullsCowsGame()
+		public BullsCowsGame(string _initWord)
 		{
-			LoadDictionary();
-			Reset();
+			m_hiddenWord = _initWord;
 		}
-
-		/************************************************************
-			Getters
-		************************************************************/
-		public int HiddenWordLenght => m_hiddenWord.Length;
-
-		public int CurrentTry => m_currentTry;
-
-		public int GetMaxTries => 4*m_hiddenWord.Length - 8;
-
-		public int BullsCount => m_bulls;
-
-		public int CowsCount => m_cows;
-
-		public bool IsGameWon => m_isWon;
 
 		/************************************************************
 			Methods
 		************************************************************/
-		void LoadDictionary()
-		{
-			string line;
-
-			StreamReader file = new StreamReader("dictionary.txt");
-			while ((line = file.ReadLine()) != null)
-			{
-				m_dictionary.Add(line);
-			}
-		}
-
-		string SelectRandomWord()
-		{
-			int WordIndex;
-			Random random = new Random();
-
-			WordIndex = random.Next(1, m_dictionary.Count);
-
-			return m_dictionary[WordIndex - 1];
-		}
-
-
-		public void Reset()
-		{
-			m_hiddenWord = SelectRandomWord();
-			m_currentTry = 1;
-			m_isWon = false;
-		}
-
 		/// <summary>
 		/// Receive a player guess and test it for validation.
 		/// </summary>
-		/// <param name="guess">string comming from the player entry</param>
-		/// <returns>Enum value according to status</returns>
-		public EGuessStatus ValidateGuess(string guess)
+		public GuessStatus SetGuessStatus(string _guess)
 		{
-			if (guess.Length != m_hiddenWord.Length)
-			{
-				return EGuessStatus.WrongLengh;
-			}
-			else if (!IsLowerCase(guess))
-			{
-				return EGuessStatus.NotLowerCase;
-			}
-			else if (!IsIsogram(guess))
-			{
-				return EGuessStatus.NotIsogram;
-			}
-			else
-			{
-				return EGuessStatus.Ok;
-			}
-		}
-
-		/// <summary>
-		/// Check if player guess is lower case
-		/// </summary>
-		/// <param name="guess"></param>
-		/// <returns></returns>
-		bool IsLowerCase(string guess)
-		{
-			foreach (char letter in guess)
-			{
-				if (!char.IsLower(letter))
-				{
-					return false;
-  				}
- 			}
-			return true;
+			return _guess.Length != HiddenWordLength ? GuessStatus.WrongLength
+				: IsIsogram(_guess) == false ? GuessStatus.NotIsogram
+				: GuessStatus.Ok;
 		}
 
 		/// <summary>
 		/// Check if player guess is an isogram
 		/// </summary>
-		/// <param name="guess"></param>
-		/// <returns></returns>
-		bool IsIsogram(string guess)
+		bool IsIsogram(string _guess)
 		{
-			if (guess.Length == 1)
+			bool _isIsogram;
+
+			if (_guess.Length == 1)
 			{
-				return true;
+				_isIsogram = true;
+			}
+			else
+			{
+				_isIsogram = _guess.Length == _guess.Distinct().Count();
 			}
 
-			List<char>letterList = new List<char>();
-
-			foreach (char letter in guess)
-			{
-				if (letterList.Contains(letter))
-				{
-					return false;
-				}
-				else
-				{
-					letterList.Add(letter);
-				}
-			}
-			return true;
+			return _isIsogram;
 		}
 
 		/// <summary>
 		/// Count Bulls & Cows in player's Guess
 		/// </summary>
-		/// <param name="guess"></param>
-		/// <returns>bool</returns>
-		public bool EndGame(string guess)
+		public bool EndGame(string _guess)
 		{
-			m_bulls = 0;
-			m_cows = 0;
+			BullsCount = 0;
+			CowsCount = 0;
 
-			for (int i = 0; i < HiddenWordLenght; i++)
+			for (int i = 0; i < HiddenWordLength; i++)
 			{
-				for (int j = 0; j < HiddenWordLenght; j++)
+				for (int j = 0; j < HiddenWordLength; j++)
 				{
-					if (m_hiddenWord[i].Equals(guess[j]))
+					if (m_hiddenWord[i].Equals(_guess[j]))
 					{
 						if (i == j)
 						{
-							m_bulls++;
+							BullsCount++;
 						}
 						else
 						{
-							m_cows++;
+							CowsCount++;
 						}
 					}
 				}
 			}
 
-			m_currentTry++;
-			return m_isWon = m_bulls == HiddenWordLenght;
+			CurrentTry++;
+			return IsWon = BullsCount == HiddenWordLength;
 		}
 	}
 }
