@@ -2,20 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Cours
+namespace CowLevel.CoreGame
 {
 	public class BullsCowsGame
 	{
-		private string m_hiddenWord;
+		private readonly string m_hiddenWord;
 		private int m_currentTry;
 		private bool m_isWon;
 		private int m_bulls;
 		private int m_cows;
-		private readonly List<string>m_dictionary = new List<string>();
 
 		public enum EGuessStatus
 		{
-
 			WrongLengh,
 			NotLowerCase,
 			NotIsogram,
@@ -25,10 +23,11 @@ namespace Cours
 		/************************************************************
 			Constructor
 		************************************************************/
-		public BullsCowsGame()
+		public BullsCowsGame(string _initWord)
 		{
-			LoadDictionary();
-			Reset();
+			m_hiddenWord = _initWord;
+			m_currentTry = 1;
+			m_isWon = false;
 		}
 
 		/************************************************************
@@ -44,56 +43,25 @@ namespace Cours
 
 		public int CowsCount => m_cows;
 
-		public bool IsGameWon => m_isWon;
+		public bool IsWon => m_isWon;
 
 		/************************************************************
 			Methods
 		************************************************************/
-		void LoadDictionary()
-		{
-			string line;
-
-			StreamReader file = new StreamReader("dictionary.txt");
-			while ((line = file.ReadLine()) != null)
-			{
-				m_dictionary.Add(line);
-			}
-		}
-
-		string SelectRandomWord()
-		{
-			int WordIndex;
-			Random random = new Random();
-
-			WordIndex = random.Next(1, m_dictionary.Count);
-
-			return m_dictionary[WordIndex - 1];
-		}
-
-
-		public void Reset()
-		{
-			m_hiddenWord = SelectRandomWord();
-			m_currentTry = 1;
-			m_isWon = false;
-		}
-
 		/// <summary>
 		/// Receive a player guess and test it for validation.
 		/// </summary>
-		/// <param name="guess">string comming from the player entry</param>
-		/// <returns>Enum value according to status</returns>
-		public EGuessStatus ValidateGuess(string guess)
+		public EGuessStatus ValidateGuess(string _guess)
 		{
-			if (guess.Length != m_hiddenWord.Length)
+			if (_guess.Length != m_hiddenWord.Length)
 			{
 				return EGuessStatus.WrongLengh;
 			}
-			else if (!IsLowerCase(guess))
+			else if (!IsLowerCase(_guess))
 			{
 				return EGuessStatus.NotLowerCase;
 			}
-			else if (!IsIsogram(guess))
+			else if (!IsIsogram(_guess))
 			{
 				return EGuessStatus.NotIsogram;
 			}
@@ -106,13 +74,11 @@ namespace Cours
 		/// <summary>
 		/// Check if player guess is lower case
 		/// </summary>
-		/// <param name="guess"></param>
-		/// <returns></returns>
-		bool IsLowerCase(string guess)
+		bool IsLowerCase(string _guess)
 		{
-			foreach (char letter in guess)
+			foreach (char _letter in _guess)
 			{
-				if (!char.IsLower(letter))
+				if (!char.IsLower(_letter))
 				{
 					return false;
   				}
@@ -123,26 +89,24 @@ namespace Cours
 		/// <summary>
 		/// Check if player guess is an isogram
 		/// </summary>
-		/// <param name="guess"></param>
-		/// <returns></returns>
-		bool IsIsogram(string guess)
+		bool IsIsogram(string _guess)
 		{
-			if (guess.Length == 1)
+			if (_guess.Length == 1)
 			{
 				return true;
 			}
 
-			List<char>letterList = new List<char>();
+			List<char>_letterList = new List<char>();
 
-			foreach (char letter in guess)
+			foreach (char _letter in _guess)
 			{
-				if (letterList.Contains(letter))
+				if (_letterList.Contains(_letter))
 				{
 					return false;
 				}
 				else
 				{
-					letterList.Add(letter);
+					_letterList.Add(_letter);
 				}
 			}
 			return true;
@@ -151,9 +115,7 @@ namespace Cours
 		/// <summary>
 		/// Count Bulls & Cows in player's Guess
 		/// </summary>
-		/// <param name="guess"></param>
-		/// <returns>bool</returns>
-		public bool EndGame(string guess)
+		public bool EndGame(string _guess)
 		{
 			m_bulls = 0;
 			m_cows = 0;
@@ -162,7 +124,7 @@ namespace Cours
 			{
 				for (int j = 0; j < HiddenWordLenght; j++)
 				{
-					if (m_hiddenWord[i].Equals(guess[j]))
+					if (m_hiddenWord[i].Equals(_guess[j]))
 					{
 						if (i == j)
 						{

@@ -1,5 +1,5 @@
 # Bulls and Cows
-C# Version 0.2.0 - Development build.
+C# Version 0.3.0 - Development build.
 
 ### Description:
 Simple word game where the player have to guess and find an isogram
