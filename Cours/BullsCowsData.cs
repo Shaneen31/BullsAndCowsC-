@@ -2,9 +2,9 @@
 using System.IO;
 using System.Linq;
 
-namespace CowLevel.Data
+namespace CowLevel
 {
-	public class BCData
+	public class BullsCowsData
 	{
 		public List<string> LoadData(string _path)
 		{

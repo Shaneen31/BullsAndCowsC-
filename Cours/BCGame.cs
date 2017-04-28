@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Linq;
 
-namespace CowLevel.CoreGame
+namespace CowLevel
 {
 	public class BullsCowsGame
 	{
 		private readonly string m_hiddenWord;
-		private int m_currentTry;
-		private bool m_isWon;
-		private int m_bulls;
-		private int m_cows;
+		public int HiddenWordLength { get { return m_hiddenWord.Length; } }
+		public int CurrentTry { get; private set; } = 1;
+		public int MaxTries { get { return 4*HiddenWordLength - 8; } }
+		public bool IsWon { get; private set; }
+		public int BullsCount { get; private set;}
+		public int CowsCount { get; private set; }
 
-		public enum EGuessStatus
+		public enum GuessStatus
 		{
-			WrongLengh,
-			NotLowerCase,
+			WrongLength,
 			NotIsogram,
 			Ok
 		}
@@ -26,24 +25,7 @@ namespace CowLevel.CoreGame
 		public BullsCowsGame(string _initWord)
 		{
 			m_hiddenWord = _initWord;
-			m_currentTry = 1;
-			m_isWon = false;
 		}
-
-		/************************************************************
-			Getters
-		************************************************************/
-		public int HiddenWordLenght => m_hiddenWord.Length;
-
-		public int CurrentTry => m_currentTry;
-
-		public int GetMaxTries => 4*m_hiddenWord.Length - 8;
-
-		public int BullsCount => m_bulls;
-
-		public int CowsCount => m_cows;
-
-		public bool IsWon => m_isWon;
 
 		/************************************************************
 			Methods
@@ -51,39 +33,11 @@ namespace CowLevel.CoreGame
 		/// <summary>
 		/// Receive a player guess and test it for validation.
 		/// </summary>
-		public EGuessStatus ValidateGuess(string _guess)
+		public GuessStatus SetGuessStatus(string _guess)
 		{
-			if (_guess.Length != m_hiddenWord.Length)
-			{
-				return EGuessStatus.WrongLengh;
-			}
-			else if (!IsLowerCase(_guess))
-			{
-				return EGuessStatus.NotLowerCase;
-			}
-			else if (!IsIsogram(_guess))
-			{
-				return EGuessStatus.NotIsogram;
-			}
-			else
-			{
-				return EGuessStatus.Ok;
-			}
-		}
-
-		/// <summary>
-		/// Check if player guess is lower case
-		/// </summary>
-		bool IsLowerCase(string _guess)
-		{
-			foreach (char _letter in _guess)
-			{
-				if (!char.IsLower(_letter))
-				{
-					return false;
-  				}
- 			}
-			return true;
+			return _guess.Length != HiddenWordLength ? GuessStatus.WrongLength
+				: IsIsogram(_guess) == false ? GuessStatus.NotIsogram
+				: GuessStatus.Ok;
 		}
 
 		/// <summary>
@@ -91,25 +45,18 @@ namespace CowLevel.CoreGame
 		/// </summary>
 		bool IsIsogram(string _guess)
 		{
+			bool _isIsogram;
+
 			if (_guess.Length == 1)
 			{
-				return true;
+				_isIsogram = true;
 			}
-
-			List<char>_letterList = new List<char>();
-
-			foreach (char _letter in _guess)
+			else
 			{
-				if (_letterList.Contains(_letter))
-				{
-					return false;
-				}
-				else
-				{
-					_letterList.Add(_letter);
-				}
+				_isIsogram = _guess.Length == _guess.Distinct().Count();
 			}
-			return true;
+
+			return _isIsogram;
 		}
 
 		/// <summary>
@@ -117,29 +64,29 @@ namespace CowLevel.CoreGame
 		/// </summary>
 		public bool EndGame(string _guess)
 		{
-			m_bulls = 0;
-			m_cows = 0;
+			BullsCount = 0;
+			CowsCount = 0;
 
-			for (int i = 0; i < HiddenWordLenght; i++)
+			for (int i = 0; i < HiddenWordLength; i++)
 			{
-				for (int j = 0; j < HiddenWordLenght; j++)
+				for (int j = 0; j < HiddenWordLength; j++)
 				{
 					if (m_hiddenWord[i].Equals(_guess[j]))
 					{
 						if (i == j)
 						{
-							m_bulls++;
+							BullsCount++;
 						}
 						else
 						{
-							m_cows++;
+							CowsCount++;
 						}
 					}
 				}
 			}
 
-			m_currentTry++;
-			return m_isWon = m_bulls == HiddenWordLenght;
+			CurrentTry++;
+			return IsWon = BullsCount == HiddenWordLength;
 		}
 	}
 }
